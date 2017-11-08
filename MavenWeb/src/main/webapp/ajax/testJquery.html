@@ -1,0 +1,31 @@
+<html>
+<head>
+<title>测试ajax</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<script src="jquery.js"></script>
+<script>
+
+$.ajax({
+	async:true,
+// 	beforeSend:function(xhr){
+// 		alert('xhr readyState='+xhr.readyState);
+// 	},
+	success:function(result){
+		$(result).each(function(index){
+			$('body').append('<div>'+this.studentId+","+this.studentName+'</div>');
+		});
+	},
+	
+	//contentType:"text/xml",
+	data:{un:"studentName"},
+	dataType:"json",
+	type:"post",
+	url:"/MavenWeb/ajax"
+	});
+</script>
+<body>
+	
+</body>
+</html>
+
