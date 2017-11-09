@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.zxxz.mapper.BookMapper">
+	<resultMap type="com.study.zxxz.dto.BookTypeDTO" id="bookType">
+		<id property="bookTypeID" column="bookTypeID"/>
+		<result property="bookTypeName" column="bookTypeName"/>
+		<association property="shelfDTO" column="bookTypeID" select="getShlfByBookTypeID"></association>
+		<collection property="bookList" column="bookTypeID" select="findBookForResult"></collection>
+	</resultMap>
+	
+	<resultMap type="com.study.zxxz.dto.BookDTO" id="bookMap">
+		<id property="bookID" column="bookID"/>
+		<result property="name" column="name"/>
+		<result property="price" column="price"/>
+	</resultMap>
+
+	<!-- 根据图书类型查询书架信息 -->
+	<select id="getShlfByBookTypeID" parameterType="java.lang.Integer" resultType="com.study.zxxz.dto.ShelfDTO">
+		select shelfID, shelfName, shelfAddress from shelf where bookTypeID = #{bookTypeID}
+	</select>
+
+	<!-- 根据类型查询图书信息 -->
+	<select id="findBookForResult" parameterType="java.lang.Integer" resultType="bookDTO">
+		select bookid, name, price from book where bookTypeID = #{bookTypeID}
+	</select>
+
+	<!-- 根据类型查询图书类型表 -->
+	<select id="findBookType" parameterType="java.lang.Integer" resultMap="bookType">
+		select t.booktypeid as bookTypeID, t.booktypename as booktypename from booktype t where 
+		    t.booktypeid = #{bookTypeID}
+	</select>
+
+	<!-- 获取图书信息，返回类型为bookMap -->
+	<select id="findBookMap" parameterType="java.lang.Integer" resultMap="bookMap">
+		select bookid, name, price from book where bookid = #{bookID}
+	</select>
+	
+	<!-- 根据id查看书籍 -->
+	<select id="findBookById" parameterType="java.lang.Integer"
+		resultType="com.study.zxxz.dto.BookDTO">
+		select * from book where bookid = #{bookID}
+	</select>
+	
+	<!-- 新增书籍 -->
+	<insert id="addBook" parameterType="bookDTO">
+		insert into book(name,
+		booktypeid, price, img, description) values (#{name}, #{bookTypeID},
+		#{price},
+		#{img}, #{description});
+	</insert>
+
+	<!-- 使用模糊匹配传入参数为普通类型（即不为javaBean），参数只能是value -->
+	<select id="findBookByName" parameterType="java.lang.String"
+		resultType="com.study.zxxz.dto.BookDTO">
+		select * from book where name like CONCAT(CONCAT('%',
+		#{value}), '%')
+	</select>
+
+	<!-- 新增书籍，返回id -->
+	<insert id="addBookReturnId" parameterType="com.study.zxxz.dto.BookDTO">
+		<selectKey keyProperty="bookID" order="AFTER" resultType="java.lang.Integer">
+			select last_insert_id()
+		</selectKey>
+		insert into book(name, booktypeid, price, img, description)
+			values (#{name}, #{bookTypeID}, #{price},
+			#{img}, #{description})
+	</insert>
+	
+	<!-- 新增图书 -->
+	<insert id="addNewBook" parameterType="com.study.zxxz.dto.TB_BookDTO">
+		<selectKey keyProperty="bookID" order="BEFORE" resultType="java.lang.String">
+			select uuid()
+		</selectKey>
+		insert into tb_book(book_id ,book_name)
+			values (#{bookID},#{bookName})
+	</insert>
+	
+	<!-- 删除图书 -->
+	<delete id="delBook" parameterType="java.lang.Integer">
+		delete from book where bookID = #{bookID}
+	</delete>
+	
+	<!-- 修改图书 -->
+	<update id="modifyBook" parameterType="com.study.zxxz.dto.TB_BookDTO">
+		update tb_book set book_name = #{bookName} where book_id = #{bookID}
+	</update>
+	
+</mapper>
